@@ -14,3 +14,13 @@ RNApeakFold generates several .ps and .fa files that can be removed afterwards b
 The result is printed on the terminal.
 
 ## SARNAclust
+SARNAclust requires the following python libraries:
+* networkx
+* eden (graph kernel)
+* sklearn 
+* matplotlib
+* forgi (bulge graph)
+* Biotools
+
+It also requires ClustalW to be installed, and the path indicated in variable *clustalw_exe*
+
