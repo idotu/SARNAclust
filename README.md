@@ -26,15 +26,15 @@ It also requires ClustalW to be installed, and the path indicated in variable *c
 Moreover, it imports dpcluster, an in-house implementation [1] of Density Clustering also available here.
 There are also a few fixed parameters that the user can change in the code:
 * MINL = 10 - min length of a peak for it to be considered
-* MAXL = 80 - max length of a peak for it to be considered
-* MAXP = 2000 - maximun number of peaks to be clustered in the same iteration
+* MAXL = 120 - max length of a peak for it to be considered
+* MAXP = 800 - maximun number of peaks to be clustered in the same iteration
 
 SARNAclust inputs an extended fasta file (i.e., the output from RNApeakFold) where there has to be
 a set of sequence/structures each composed of three lines: fasta comment (see RNApeakFold above), sequence
 and secondary structure. It also requires a set of parameters:
 * r - radius (see [EDeN](https://github.com/fabriziocosta/EDeN) library)
 * d - distance (see [EDeN](https://github.com/fabriziocosta/EDeN) library)
-* cluster_option - depends on the method selected, but the format is "(method param1 param2 ... paramN)":
+* cluster_option - depends on the method selected, but the format is "(method,param1,param2, ... ,paramN)":
   * 0 - MeanShift (sklearn)
   * 1 - DBSCAN (sklearn)  
     * similarity - maximum distance between 2 sequences in the same cluster (0:1)
@@ -65,10 +65,13 @@ and secondary structure. It also requires a set of parameters:
 * verbose 
 * debug - plots the graph transformations
 
-Since python can only handle a certain number of graphs loaded in memory (around 2000 depending on the machine
+Since python can only handle a certain number of graphs loaded in memory (around 800 depending on the machine
 running the code), SARNAclust performs a number of *iterations* selecting each time *MAXP* random sequences
 and then merging clusters among iterations if the average distance between sequences in 2 clusters is lower
-than *thClus*.
+than *thClus*. Each sequence/structure is decomposed into substructures that are automatically detected and the
+clustering is performed on those, unless graph option *0* is selected. To disallow structure decomposition just
+change readFile(fn,gopt) in the main function for readFile(fn,0). This should allow the user to up *MAXP* to
+around 2000.
 
 At the end, SARNAclust returns a set of clusters along with their consensus sequence and structure.
 
