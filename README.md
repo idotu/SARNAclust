@@ -48,6 +48,7 @@ and secondary structure. It also requires a set of parameters:
     * lowerbound percentile
     * dc
 * graph_option:
+  * 0 - Complete graph with no structural information
   * 1 - graphProt minus directional                     
   * 2 - Bulge graph plus Complete Graph                 
   * 3 - Bulge graph                                     
