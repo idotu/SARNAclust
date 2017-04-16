@@ -74,6 +74,10 @@ change readFile(fn,gopt) in the main function for readFile(fn,0). This should al
 around 2000.
 
 At the end, SARNAclust returns a set of clusters along with their consensus sequence and structure.
+You can try with our example file GAGAandRandom.efa and DBSCAN, for instance, with the following command
+line:
+
+python SARNAclust.py ../synthetic/GAGAandRandom.efa 2 3 "(1,0.6,10)" 9 0.6 5 0 0
 
 # References
 
