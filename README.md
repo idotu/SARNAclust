@@ -24,3 +24,10 @@ SARNAclust requires the following python libraries:
 
 It also requires ClustalW to be installed, and the path indicated in variable *clustalw_exe*
 
+Moreover, it imports dpcluster, an in-house implementation [1] of Density Clustering also available here.
+
+
+# References
+
+* [1] - Rodriguez A, Laio A. 2014. Machine learning. Clustering by fast search and find of density peaks. Science 344: 1492–1496.
+
