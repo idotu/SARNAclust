@@ -48,6 +48,17 @@ and secondary structure. It also requires a set of parameters:
     * lowerbound percentile
     * dc
 * graph_option:
+  * 1 - graphProt minus directional                     
+  * 2 - Bulge graph plus Complete Graph                 
+  * 3 - Bulge graph                                     
+  * 4 - Bulge graph plus sequence in HP loops           
+  * 5 - Bulge graph plus sequence in IL loops           
+  * 6 - Bulge graph plus sequence in external loops     
+  * 7 - Bulge graph plus sequence in double stranded    
+  * 8 - Bulge graph plus sequence in HP and IL          
+  * 9 - Bulge graph plus sequence in single stranded    
+  * 10 - Bulge graph plus sequence everywhere           
+  * 11 - Same as 2 but no sequence in double stranded  
 * thClus - distance threshold for merging clusters (0:1)
 * iterations - number of iterations
 * verbose 
