@@ -16,16 +16,35 @@ The result is printed on the terminal.
 ## SARNAclust
 SARNAclust requires the following python libraries:
 * networkx
-* eden (graph kernel)
+* [EDeN](https://github.com/fabriziocosta/EDeN) (graph kernel)
 * sklearn 
 * matplotlib
 * forgi (bulge graph)
 * Biotools
 
-It also requires ClustalW to be installed, and the path indicated in variable *clustalw_exe*
-
+It also requires ClustalW to be installed, and the path indicated in variable *clustalw_exe*.
 Moreover, it imports dpcluster, an in-house implementation [1] of Density Clustering also available here.
+There are also a few fixed parameters that the user can change in the code:
+* MINL = 10 - min length of a peak for it to be considered
+* MAXL = 80 - max length of a peak for it to be considered
+* MAXP = 2000 - maximun number of peaks to be clustered in the same iteration
 
+SARNAclust inputs an extended fasta file (i.e., the output from RNApeakFold) where there has to be
+a set of sequence/structures each composed of three lines: fasta comment (see RNApeakFold above), sequence
+and secondary structure. It also requires a set of parameters:
+* r - radius (see [EDeN](https://github.com/fabriziocosta/EDeN) library)
+* d - distance (see [EDeN](https://github.com/fabriziocosta/EDeN) library)
+* cluster_option:
+* graph_option:
+* thClus - distance threshold for merging clusters (0:1)
+* iterations - number of iterations
+* verbose 
+* debug - plots the graph transformations
+
+Since python can only handle a certain number of graphs loaded in memory (around 2000 depending on the machine
+running the code), SARNAclust performs a number of *iterations* selecting each time *MAXP* random sequences
+and then merging clusters among iterations if the average distance between sequences in 2 clusters is lower
+than *thClus*
 
 # References
 
