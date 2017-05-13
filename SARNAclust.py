@@ -447,6 +447,39 @@ def getGraph9(peak):
 
   return G
 
+def getGraph10(peak,G1):
+    seq,stru = peak
+    bg = fgb.BulgeGraph(dotbracket_str=stru)
+    n = len(seq)
+    G = G1.copy()
+    i = n
+    dict = {}
+                            
+    for key2 in bg.defines.keys():
+      if key2[0]=='h':
+        G.add_node(i,label=key2[0])
+      elif key2[0]=='s':
+        G.add_node(i,label=key2[0])
+      else:
+        G.add_node(i,label='i')
+      dict[key2] = i
+      i += 1
+        
+    for key1 in bg.edges:
+      for key2 in bg.edges[key1]:
+        G.add_edge(dict[key1],dict[key2],label='v')
+        
+    for i in range(n):
+      key = bg.get_node_from_residue_num(i+1)
+      G.add_edge(i,dict[key],label='abb')
+        
+    if DEBUG==1:
+      print seq
+      print stru
+      display.draw_graph(G, size=25, node_size=2000, font_size=14, node_border=True, size_x_to_y_ratio=3)
+        
+    return G
+
 def getGraph11(peak,G1):
   seq,stru = peak
   bps = getbps(stru)
