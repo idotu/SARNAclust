@@ -13,18 +13,20 @@ from sklearn.cluster import SpectralClustering
 from dpcluster import dclust
 import forgi.graph.bulge_graph as fgb
 from random import random
-from Bio.Align.Applications import ClustalwCommandline
+#from Bio.Align.Applications import ClustalwCommandline
 from Bio import AlignIO
 
 #####fixed params#####
 MINL = 10 #min length of a peak for it to be considered
-MAXL = 120 #max length of a peak for it to be considered
-MAXP = 800 #maximun number of peaks to be clustered in the same iteration
+MAXL = 320 #max length of a peak for it to be considered
+MAXP = 1400 #maximun number of peaks to be clustered in the same iteration
 ######################
 
 used = []
 
-clustalw_exe = "/Users/idotu/tools/clustalw-2.1-macosx/clustalw2"
+#clustalw_exe = "/Users/idotu/tools/clustalw-2.1-macosx/clustalw2"
+locarna_exe1 = "mlocarna "
+locarna_exe2 = " --indel=-50 --indel-opening=-800"
 
 iupac = {"R":["A","G"],"Y":["C","T"],"S":["G","C"],"W":["A","T"],"K":["G","T"],"M":["A","C"],"B":["C","G","T"],
     "D":["A","G","T"],"H":["A","C","T"],"V":["A","C","G"],"N":["A","C","G","T"]}
@@ -135,27 +137,31 @@ def readFile(fn,op):
       line = f.readline().strip()
     stru = stru.split()[0]
     n = len(seq)
-    if op == 0:
-      ss = [(0,n+1)]
-    else:
-      ss = findSubstrs(stru)
-    m = len(ss)
+    if n<=MAXL:
+      if op == 0:
+        ss = [(0,n+1)]
+      else:
+        ss = findSubstrs(stru)
+      m = len(ss)
 
-    if m<len(letters):
-      for j in range(m):
-        a,b = ss[j]
-        words = comm.split("|")
-        comm2 = ""
-        for k in range(len(words)):
-          if k==2:
-            comm2+=words[k]+letters[j]+"|"
-          else:
-            comm2 += words[k]+"|"
-        if comm2 not in used: #and i<MAXP:
-          seq2 = seq[a:b]
-          stru2 = stru[a:b]
-          peaks[comm2] = (seq2,stru2)
-          i += 1
+      if m<len(letters):
+        for j in range(m):
+          a,b = ss[j]
+          words = comm.split("|")
+          comm2 = ""
+          for k in range(len(words)):
+            if k==2:
+              comm2+=words[k]+letters[j]+"|"
+            else:
+              comm2 += words[k]+"|"
+          if comm2 not in used: #and i<MAXP:
+            seq2 = seq[a:b]
+            stru2 = stru[a:b]
+            peaks[comm2] = (seq2,stru2)
+            #print comm2
+            #print seq2
+            #print stru2
+            i += 1
 
   f.close()
   
@@ -196,7 +202,7 @@ def getbps(stru):
   return bps
 
 
-def getGraph5(peak,stems):
+def getGraph5(peak,stems,alpha):
   seq,stru = peak
   bps = getbps(stru)
   G = nx.Graph()
@@ -211,22 +217,22 @@ def getGraph5(peak,stems):
     #print i,pile
     if stru[i]==".":
       if single==1:
-        G.add_node(j,label = seq[i])
+        G.add_node(j,label = alpha[seq[i]])
         G.add_edge(j-1,j,label = 'bb')
         j += 1
       else:
        single = 1
        if open>0:
-         G.add_node(j,label = seq[i])
+         G.add_node(j,label = alpha[seq[i]])
          G.add_edge(j-1,j,label = 'bb')
          j += 1
          open = 0
        elif close>0:
-         G.add_node(j,label = seq[i])
+         G.add_node(j,label = alpha[seq[i]])
          G.add_edge(j-1,j,label = 'bb')
          j += 1
        else: #it is the first node
-         G.add_node(j,label = seq[i])
+         G.add_node(j,label = alpha[seq[i]])
          j += 1
     elif stru[i]=="(":
       if stems==1:
@@ -301,8 +307,19 @@ def getGraph5(peak,stems):
     display.draw_graph(G, size=15, node_size=1500, font_size=24, node_border=True, size_x_to_y_ratio=3)
   return G
 
+def hl(i,j,stru):
+  seq = stru[i:j]
+        
+  if seq.find('(')!=-1:
+    return False
+                
+  if seq.find(')')!=-1:
+    return False
+                        
+  return True
 
-def getGraph8(peak,G1):
+
+def getGraph8(peak,G1,alpha):
   seq,stru = peak
   bps = getbps(stru)
   G = G1.copy()#nx.Graph()
@@ -424,7 +441,7 @@ def getGraph8(peak,G1):
 
   return G
 
-def getGraph9(peak):
+def getGraph9(peak,alpha):
   seq,stru = peak
   bg = fgb.BulgeGraph(dotbracket_str=stru)
   
@@ -447,7 +464,7 @@ def getGraph9(peak):
 
   return G
 
-def getGraph10(peak,G1):
+def getGraph10(peak,G1,alpha):
     seq,stru = peak
     bg = fgb.BulgeGraph(dotbracket_str=stru)
     n = len(seq)
@@ -480,7 +497,7 @@ def getGraph10(peak,G1):
         
     return G
 
-def getGraph11(peak,G1):
+def getGraph11(peak,G1,alpha):
   seq,stru = peak
   bps = getbps(stru)
   bg = fgb.BulgeGraph(dotbracket_str=stru)
@@ -547,7 +564,7 @@ def getGraph11(peak,G1):
         
   return G
 
-def getGraph14(peak,all,upsc,struYes):
+def getGraph14(peak,all,upsc,struYes,alpha):
   seq,stru2 = peak
   if struYes==1:
     stru = stru2
@@ -555,7 +572,8 @@ def getGraph14(peak,all,upsc,struYes):
     stru = ""
     for i in range(len(seq)):
       stru += "."
-  bgw = 10
+  bgw = 1
+  bbw = 1
   bg = fgb.BulgeGraph(dotbracket_str=stru)
   n = len(seq)
   if len(bg.defines.keys())==1: #Empty structure
@@ -578,9 +596,9 @@ def getGraph14(peak,all,upsc,struYes):
     lb = key2[0]
     if lb!='s':
       lb = 'u'
-      w = 1
+      w = 10
     else:
-      w = 1
+      w = 10
     G.add_node(i,label=lb,weight=w)
     dict[key2] = i
     i += 1
@@ -644,28 +662,28 @@ def getGraph14(peak,all,upsc,struYes):
     
     st = min(hairpins[key])
     ed = max(hairpins[key])
-    G.add_node(i,label=seq[st:st+1])
+    G.add_node(i,label=alpha[seq[st:st+1]])
     if key[0]!='f':
       G.add_edge(dict[key],i,label='abb',weight=bgw)
     i += 1
     if key[0]!='i' and key[0]!='s':
       for j in range(st+1,ed):
-        G.add_node(i,label=seq[j:j+1])
-        G.add_edge(i-1,i,label='bb')
-        if upsc==1:
-          G.add_edge(dict[key],i,label='abb',weight=bgw)
+        G.add_node(i,label=alpha[seq[j:j+1]])
+        G.add_edge(i-1,i,label='bb',weight=bbw)
+        #if upsc==1:
+        G.add_edge(dict[key],i,label='abb',weight=bgw)
         i += 1
       if len(hairpins[key])>1:
-        G.add_node(i,label=seq[ed:ed+1])
-        G.add_edge(i-1,i,label='bb')
+        G.add_node(i,label=alpha[seq[ed:ed+1]])
+        G.add_edge(i-1,i,label='bb',weight=bbw)
         i += 1
-      if key[0]!='t':
-        G.add_edge(i-1,dict[key],label='abb',weight=bgw)
+      #if key[0]!='t':
+      G.add_edge(i-1,dict[key],label='abb',weight=bgw)
     else:
       j = st+1
       while(j in hairpins[key]):
-        G.add_node(i,label=seq[j:j+1])
-        G.add_edge(i-1,i,label='bb')
+        G.add_node(i,label=alpha[seq[j:j+1]])
+        G.add_edge(i-1,i,label='bb',weight=bbw)
         i += 1
         j += 1
       if j-st>1:
@@ -673,17 +691,17 @@ def getGraph14(peak,all,upsc,struYes):
       elif upsc==1:
         G.add_edge(dict[key],i-1,label='abb',weight=bgw)
       if st!=ed and j!=ed+1:
-        G.add_node(i,label=seq[ed:ed+1])
+        G.add_node(i,label=alpha[seq[ed:ed+1]])
         G.add_edge(dict[key],i,label='abb',weight=bgw)
         if upsc==1:
           G.add_edge(dict[key],i,label='abb',weight=bgw)
         i += 1
         j = ed-1
         while(j in hairpins[key]):
-          G.add_node(i,label=seq[j:j+1])
-          G.add_edge(i-1,i,label='bb')
-          if upsc==1:
-            G.add_edge(dict[key],i,label='abb',weight=bgw)
+          G.add_node(i,label=alpha[seq[j:j+1]])
+          G.add_edge(i-1,i,label='bb',weight=bbw)
+          #if upsc==1:
+          G.add_edge(dict[key],i,label='abb',weight=bgw)
           i += 1
           j -= 1
         if ed-j>1 and upsc==0:
@@ -692,44 +710,53 @@ def getGraph14(peak,all,upsc,struYes):
   if DEBUG==1:
     print seq
     print stru
-    display.draw_graph(G, size=15, node_size=1500, font_size=24, node_border=True, size_x_to_y_ratio=3)
+    display.draw_graph(G, size=15, node_size=1500, font_size=24, node_border=True, size_x_to_y_ratio=3, vertex_color='red')
 
   return G
 
 
-def peaksToGraphs(peaks,op):
+def peaksToGraphs(peaks,op,aopt):
   graphs = []
   dict = {}
+  alpha = {}
+  if aopt==0:
+    alpha = {'A':'A','C':'C','G':'G','U':'U','T':'T'}
+  else:
+    alpha = {'A':'R','C':'Y','G':'R','U':'Y','T':'Y'}
   i = 0
   for key in peaks:
     peak = peaks[key]
+    seq,stru = peak
+    #print key
+    #print seq
+    #print stru
     if op==0:
-        G = getGraph14(peak,4,0,0)
+        G = getGraph14(peak,4,0,0,alpha)
     if op==1:
-      G1 = getGraph5(peak,1)
-      G = getGraph8(peak,G1)
+      G1 = getGraph5(peak,1,alpha)
+      G = getGraph8(peak,G1,alpha)
     if op==2:
-      G1 = getGraph5(peak,1)
-      G = getGraph10(peak,G1)
+      G1 = getGraph5(peak,1,alpha)
+      G = getGraph10(peak,G1,alpha)
     if op==3:
-      G = getGraph9(peak)
+      G = getGraph9(peak,alpha)
     if op==4:
-      G = getGraph14(peak,0,0,1)
+      G = getGraph14(peak,0,0,1,alpha)
     if op==5:
-      G = getGraph14(peak,2,0,1)
+      G = getGraph14(peak,2,0,1,alpha)
     if op==6:
-      G = getGraph14(peak,5,0,1)
+      G = getGraph14(peak,5,0,1,alpha)
     if op==7:
-      G = getGraph14(peak,3,0,1)
+      G = getGraph14(peak,3,0,1,alpha)
     if op==8:
-      G = getGraph14(peak,1,0,1)
+      G = getGraph14(peak,1,0,1,alpha)
     if op==9:
-      G = getGraph14(peak,6,0,1)
+      G = getGraph14(peak,6,0,1,alpha)
     if op==10:
-      G = getGraph14(peak,4,0,1)
+      G = getGraph14(peak,4,0,1,alpha)
     if op==11:
-      G1 = getGraph5(peak,0)
-      G = getGraph11(peak,G1)
+      G1 = getGraph5(peak,0,alpha)
+      G = getGraph11(peak,G1,alpha)
     graphs.append(G)
     dict[i] = key
     i += 1
@@ -741,9 +768,11 @@ def clusterGraphs(graphs,r,d,copt):
   opt = int(optl[0])
   vectorizer = Vectorizer( r=r,d=d )
   samples = len(graphs)
+  minlclu = 5
   Xsp = vectorizer.transform( graphs )#sparse feature matrix
   X = Xsp.todense()#regular feature matrix
-  SM=metrics.pairwise.pairwise_kernels(Xsp, metric='rbf', gamma = 1)#similarity matrix
+  #SM=metrics.pairwise.pairwise_kernels(Xsp, metric='rbf', gamma = 1)#similarity matrix
+  SM=metrics.pairwise.pairwise_kernels(Xsp, metric='linear')
   DM=[]#distance matrix
   for i in range(len(SM)):
     DM.append([])
@@ -757,11 +786,12 @@ def clusterGraphs(graphs,r,d,copt):
     nc,labels = MShift(X)
   if opt==1:
     #print DM
+    minlclu = int(optl[2])
     nc,labels = DB_SCAN(DM,float(optl[1]),int(optl[2]))
   if opt==2:
     nc,labels = AffProp(SM)
   if opt==3:
-    print DM #Matrix(X)
+    print SM #Matrix(X)
     return 0,[]
   if opt==4:
     nc,labels = K_Means(X)
@@ -770,7 +800,7 @@ def clusterGraphs(graphs,r,d,copt):
   if opt==6:
     nc,labels = dclust(DM,int(optl[1]),int(optl[2]),float(optl[3]))
 
-  return nc,labels
+  return nc,labels,minlclu
 
 def SpecClus(SM):
   sc = SpectralClustering(n_clusters=8, affinity = 'precomputed')
@@ -828,14 +858,14 @@ def DB_SCAN(X,sim,sam):
   n_clusters_ = len(set(labels)) - (1 if -1 in labels else 0)
   return n_clusters_,labels
 
-def compare(finalL,L,peaks,opt,th):
+def compare(finalL,L,peaks,opt,th,alpha):
   n = len(L)
   lpeaks = {}
   for key in L:
     lpeaks[key] = peaks[key]
   for key in finalL:
       lpeaks[key] = peaks[key]
-  graphs,dict = peaksToGraphs(lpeaks,opt)
+  graphs,dict = peaksToGraphs(lpeaks,opt,alpha)
   
   vectorizer = Vectorizer( r=2,d=3 )
   samples = len(graphs)
@@ -866,7 +896,7 @@ def compare(finalL,L,peaks,opt,th):
     return 1
 
 
-def getClusters(nc,labels,dict,peaks,cf,clus,nclus,opt,th,usedpeaks):
+def getClusters(nc,labels,dict,peaks,cf,clus,nclus,opt,th,usedpeaks,alpha):
   numClusters = nclus
   for i in range(nc):
     objs = []
@@ -877,7 +907,7 @@ def getClusters(nc,labels,dict,peaks,cf,clus,nclus,opt,th,usedpeaks):
         usedpeaks[dict[j]] = peaks[dict[j]]
     newClu = 1
     for k in range(numClusters):
-      newClu = compare(clus[k],objs,usedpeaks,opt,th)
+      newClu = compare(clus[k],objs,usedpeaks,opt,th,alpha)
       if newClu==0:
         for l in range(len(objs)):
           clus[k].append(objs[l])
@@ -951,6 +981,27 @@ def getAlginedStru(stru,seq):
       i += 1
   return stru2
 
+def getLogo(seqs):
+    n = len(seqs)
+    m = len(seqs[0])
+    sql = ""
+    for i in range(m):
+      sqd = {}
+      for j in range(n):
+        if seqs[j][i] not in sqd:
+          sqd[seqs[j][i]] = 0
+        sqd[seqs[j][i]] = sqd[seqs[j][i]] + 1
+        
+      th = n*0.7
+      sqch = "N"
+      for key in sqd:
+        if sqd[key]>=th:
+          sqch = key
+          break
+      sql += sqch
+    return sql
+
+
 def getLogos(seqs,strus):
   n = len(seqs)
   m = len(seqs[0])
@@ -981,8 +1032,20 @@ def getLogos(seqs,strus):
     stl += stch
   return sql.strip("-"),stl.strip("-")
 
+def okOthers(seqlogo):
+  n = len(seqlogo)
+  if seqlogo.find('A')==-1 and seqlogo.find('C')==-1 and seqlogo.find('G')==-1 and seqlogo.find('U')==-1:
+    return 0
+  dashes = 0
+  for i in range(n):
+    if seqlogo[i]=='-':
+      dashes+=1
+  if dashes>=n/2:
+    return 0
+  return 1
 
-def main(fn,r,d,opt,gopt,cf,its,thClus,v):
+
+def main(fn,r,d,opt,gopt,cf,its,thClus,v,alpha):
   usedpeaks = {}
   finalClusters = {}
   numClusters = 0
@@ -991,13 +1054,14 @@ def main(fn,r,d,opt,gopt,cf,its,thClus,v):
     #print peaks
     if len(peaks)==0:
       break
-    graphs,dict = peaksToGraphs(peaks,gopt)
-    nc,labels = clusterGraphs(graphs,r,d,opt)
+    graphs,dict = peaksToGraphs(peaks,gopt,alpha)
+    nc,labels,minlclu = clusterGraphs(graphs,r,d,opt)
     if opt!=3:
-      numClusters = getClusters(nc,labels,dict,peaks,cf,finalClusters,numClusters,gopt,thClus,usedpeaks)
+      numClusters = getClusters(nc,labels,dict,peaks,cf,finalClusters,numClusters,gopt,thClus,usedpeaks,alpha)
 
   for i in range(numClusters):
     smallKeyToStru = {}
+    smallKeyToKey = {}
     print "Cluster " + str(i)
     ofn ="Cluster" + str(i) + ".fa"
     f = open(ofn,"w")
@@ -1010,10 +1074,13 @@ def main(fn,r,d,opt,gopt,cf,its,thClus,v):
         smallKeyToStru[key2] = st
         f.write(">"+key2+"\n")
         f.write(sq+"\n")
+      smallKeyToKey[key2]=key
     f.close()
-    clustalw_cline = ClustalwCommandline(clustalw_exe, infile=ofn)
-    stdout, stderr = clustalw_cline()
-    align = AlignIO.read(ofn[:-3]+".aln", "clustal")
+#clustalw_cline = ClustalwCommandline(clustalw_exe, infile=ofn)
+#   stdout, stderr = clustalw_cline()
+    command = locarna_exe1+ofn+locarna_exe2+" > "+ofn[:-3]+".aln"
+    os.system(command)
+    align = AlignIO.read(ofn[:-3]+".out/results/result"+".aln", "clustal")
     seqs = []
     strus = []
     ids = []
@@ -1023,18 +1090,50 @@ def main(fn,r,d,opt,gopt,cf,its,thClus,v):
       stru = smallKeyToStru[record.id]
       alignedstru = getAlginedStru(stru,record.seq)
       strus.append(alignedstru)
-    if v==1:
-      for j in range(len(seqs)):
-        print seqs[j] + "\t" + ids[j]
-        print strus[j]
-    seqlogo,strulogo = getLogos(seqs,strus)
+    f = open(ofn[:-3]+".aln")
+    line = f.readline()
+    while line[:3]!='chr' and line[:3]!='seq':
+      line = f.readline()
+    pline = ''
+    lclu = 0
+    while len(line)>0:
+      if line[:7]=='alifold':
+        #print line.strip()
+        strulogo = line.split()[1]
+        line2 = f.readline()
+        while len(line2)>0:
+          strulogo+=line2.split()[0]
+          line = line2
+          line2 = f.readline()
+        score = line.split()[2]
+        if score=='(':
+          score = line.split()[3]
+        break
+      else:
+        pline += '\n'
+      while line[:3]=='chr' or line[:3]=='seq':
+        pline += line.strip()+'\n'
+        lclu+=1
+        line = f.readline()
+      line = f.readline()
+    seqlogo = getLogo(seqs)
+    if (score!='0.00' or (strulogo.find('(')==-1 and okOthers(seqlogo)==1)) and lclu>=minlclu:
+        print pline
+        #os.system("rm "+ofn[:-3]+".aln")
+        os.system("rm "+ofn[:-3]+".fa")
+        os.system("rm -R "+ofn[:-3]+".out")
 
-
-    print "*******************************************"
-    print seqlogo
-    print strulogo
-    print len(finalClusters[i])
-    print "*******************************************"
+        if score[0]=='(':
+            score = score[1:]
+        print "*******************************************"
+        print seqlogo
+        print strulogo,score
+        print len(finalClusters[i])
+        print "*******************************************"
+    else:
+      os.system("rm "+ofn[:-3]+".aln")
+      os.system("rm "+ofn[:-3]+".fa")
+      os.system("rm -R "+ofn[:-3]+".out")
 
 
 #######################################################
@@ -1066,7 +1165,7 @@ def main(fn,r,d,opt,gopt,cf,its,thClus,v):
 
 if __name__ == '__main__':
   if len(sys.argv)<8:
-    print "Usage: %s file r d cluster_option graph_option thClus iterations verbose debug"
+    print "Usage: %s file r d cluster_option graph_option thClus iterations verbose alpha"
     sys.exit(1)
   fn = sys.argv[1]
   r = int(sys.argv[2])
@@ -1076,6 +1175,7 @@ if __name__ == '__main__':
   thClus = float(sys.argv[6])
   its = int(sys.argv[7])
   verbose = int(sys.argv[8])
-  DEBUG = int(sys.argv[9])
+  alpha = int(sys.argv[9])
+  DEBUG = 0
   cf = "None"
-  main(fn,r,d,opt,gopt,cf,its,thClus,verbose)
+  main(fn,r,d,opt,gopt,cf,its,thClus,verbose,alpha)
