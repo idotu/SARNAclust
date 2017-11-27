@@ -22,12 +22,12 @@ SARNAclust requires the following python libraries:
 * forgi (bulge graph)
 * Biotools
 
-It also requires ClustalW to be installed, and the path indicated in variable *clustalw_exe*.
+It also requires Locarna to be installed.
 Moreover, it imports dpcluster, an in-house implementation [1] of Density Clustering also available here.
 There are also a few fixed parameters that the user can change in the code:
 * MINL = 10 - min length of a peak for it to be considered
-* MAXL = 120 - max length of a peak for it to be considered
-* MAXP = 800 - maximun number of peaks to be clustered in the same iteration
+* MAXL = 320 - max length of a peak for it to be considered
+* MAXP = 1400 - maximun number of peaks to be clustered in the same iteration
 
 SARNAclust inputs an extended fasta file (i.e., the output from RNApeakFold) where there has to be
 a set of sequence/structures each composed of three lines: fasta comment (see RNApeakFold above), sequence
@@ -63,7 +63,7 @@ and secondary structure. It also requires a set of parameters:
 * thClus - distance threshold for merging clusters (0:1)
 * iterations - number of iterations
 * verbose 
-* debug - plots the graph transformations
+* alpha - alphabet (0- A,C,G,U; 1- G,R)
 
 Since python can only handle a certain number of graphs loaded in memory (around 800 depending on the machine
 running the code), SARNAclust performs a number of *iterations* selecting each time *MAXP* random sequences
