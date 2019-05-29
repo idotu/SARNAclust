@@ -129,7 +129,7 @@ def readFile(fn,op):
     #print line
     seq = ""
     while(line[0]!='.' and line[0]!='('):
-      seq += line
+      seq += line.upper()
       line = f.readline().strip()
     stru = ""
     while(len(line)>0 and line[0]!='>'):
