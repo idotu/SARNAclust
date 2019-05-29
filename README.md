@@ -20,8 +20,8 @@ There are also a few fixed parameters that the user can change in the code:
 * MAXL = 320 - max length of a peak for it to be considered
 * MAXP = 1400 - maximun number of peaks to be clustered in the same iteration
 
-SARNAclust inputs an extended fasta file (i.e., the output from RNApeakFold) where there has to be
-a set of sequence/structures each composed of three lines: fasta comment (see RNApeakFold above), sequence
+SARNAclust inputs an extended fasta file (i.e., the output from RNAfold) where there has to be
+a set of sequence/structures each composed of three lines: fasta comment, sequence
 and secondary structure. It also requires a set of parameters:
 * r - radius (see [EDeN](https://github.com/fabriziocosta/EDeN) library)
 * d - distance (see [EDeN](https://github.com/fabriziocosta/EDeN) library)
