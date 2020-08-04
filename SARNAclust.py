@@ -1237,4 +1237,12 @@ if __name__ == '__main__':
   alpha = args.alpha
   DEBUG = 0
   cf = "None"
+
+  if (args.seed == -1):
+    seed = random.randrange(sys.maxsize)
+  else:
+    seed = args.seed
+  random.seed(seed)
+  
   main(fn,r,d,opt,gopt,cf,its,thClus,verbose,alpha)
+
