@@ -13,7 +13,7 @@ SARNAclust requires the following python libraries:
 * forgi (bulge graph)
 * Biotools
 
-It also requires Locarna to be installed.
+It also requires Locarna 1.8.12 to be installed.
 Moreover, it imports dpcluster, an in-house implementation [1] of Density Clustering also available here.
 There are also a few fixed parameters that the user can change in the code:
 * MINL = 10 - min length of a peak for it to be considered
