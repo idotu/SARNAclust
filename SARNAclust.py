@@ -16,7 +16,7 @@ from random import random
 #from Bio.Align.Applications import ClustalwCommandline
 from Bio import AlignIO
 import argparse
-
+import random
 
 def restricted_float(x):
   try:
