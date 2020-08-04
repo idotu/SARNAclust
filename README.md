@@ -23,9 +23,9 @@ There are also a few fixed parameters that the user can change in the code:
 SARNAclust inputs an extended fasta file (i.e., the output from RNAfold) where there has to be
 a set of sequence/structures each composed of three lines: fasta comment, sequence
 and secondary structure. It also requires a set of parameters:
-* r - radius (see [EDeN](https://github.com/fabriziocosta/EDeN) library)
-* d - distance (see [EDeN](https://github.com/fabriziocosta/EDeN) library)
-* cluster_option - depends on the method selected, but the format is "(method,param1,param2, ... ,paramN)":
+* -r - radius (see [EDeN](https://github.com/fabriziocosta/EDeN) library, default 2)
+* -d - distance (see [EDeN](https://github.com/fabriziocosta/EDeN) library, default 3)
+* -cluster_option - depends on the method selected, but the format is "(method,param1,param2, ... ,paramN)" (default DBSCAN '(1,0.6,10)'):
   * 0 - MeanShift (sklearn)
   * 1 - DBSCAN (sklearn)  
     * similarity - maximum distance between 2 sequences in the same cluster (0:1)
@@ -38,7 +38,7 @@ and secondary structure. It also requires a set of parameters:
     * Flag for adding halo as part of the cluster (0,1) 
     * lowerbound percentile
     * dc
-* graph_option:
+* -graph_option (default 9):
   * 0 - Complete graph with no structural information
   * 1 - graphProt minus directional                     
   * 2 - Bulge graph plus Complete Graph                 
@@ -51,10 +51,10 @@ and secondary structure. It also requires a set of parameters:
   * 9 - Bulge graph plus sequence in single stranded    
   * 10 - Bulge graph plus sequence everywhere           
   * 11 - Same as 2 but no sequence in double stranded  
-* thClus - distance threshold for merging clusters (0:1)
-* iterations - number of iterations
-* verbose 
-* alpha - alphabet (0- A,C,G,U; 1- G,R)
+* -thClus - distance threshold for merging clusters (0:1, default 0.6)
+* -iterations - number of iterations (default 5)
+* -verbose (default 0)
+* -alpha - alphabet (0- A,C,G,U; 1- G,R, default 0)
 
 Since python can only handle a certain number of graphs loaded in memory (around 800 depending on the machine
 running the code), SARNAclust performs a number of *iterations* selecting each time *MAXP* random sequences
@@ -65,10 +65,10 @@ change readFile(fn,gopt) in the main function for readFile(fn,0). This should al
 around 2000.
 
 At the end, SARNAclust returns a set of clusters along with their consensus sequence and structure.
-You can try with our example file GAGAandRandom.efa and DBSCAN, for instance, with the following command
+You can try with our example file GAGAandRandom.efa and DBSCAN (default options), for instance, with the following command
 line:
 
-python SARNAclust.py ../synthetic/GAGAandRandom.efa 2 3 "(1,0.6,10)" 9 0.6 5 0 0
+python SARNAclust.py
 
 # References
 
