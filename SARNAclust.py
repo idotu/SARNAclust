@@ -12,7 +12,6 @@ from sklearn.cluster import KMeans
 from sklearn.cluster import SpectralClustering
 from dpcluster import dclust
 import forgi.graph.bulge_graph as fgb
-from random import random
 #from Bio.Align.Applications import ClustalwCommandline
 from Bio import AlignIO
 import argparse
@@ -188,7 +187,7 @@ def readFile(fn,op):
     for key in peaks:
       if key not in used:
         
-        rd = random()
+        rd = random.random()
         if rd < f:
           peaks2[key] = peaks[key]
     #used.append(key)
@@ -1074,9 +1073,9 @@ def main(fn,r,d,opt,gopt,cf,its,thClus,v,alpha):
       numClusters = getClusters(nc,labels,dict,peaks,cf,finalClusters,numClusters,gopt,thClus,usedpeaks,alpha)
 
   for i in range(numClusters):
+    smallKeyToStru = {}
+    smallKeyToKey = {}
     if len(finalClusters[i])<300:
-      smallKeyToStru = {}
-      smallKeyToKey = {}
       print("Cluster " + str(i))
       ofn ="Cluster" + str(i) + ".fa"
       f = open(ofn,"w")
